@@ -1,4 +1,4 @@
-# Copyright 2025 Black Forest Labs and The HuggingFace Team. All rights reserved.
+# Copyright 2025 Veda Labs and The HuggingFace Team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ from transformers import (
 )
 
 from ...image_processor import PipelineImageInput, VaeImageProcessor
-from ...loaders import FluxIPAdapterMixin, FluxLoraLoaderMixin, FromSingleFileMixin, TextualInversionLoaderMixin
-from ...models import AutoencoderKL, FluxTransformer2DModel
+from ...loaders import VedikaIPAdapterMixin, VedikaLoraLoaderMixin, FromSingleFileMixin, TextualInversionLoaderMixin
+from ...models import AutoencoderKL, VedikaTransformer2DModel
 from ...schedulers import FlowMatchEulerDiscreteScheduler
 from ...utils import (
     USE_PEFT_BACKEND,
@@ -40,7 +40,7 @@ from ...utils import (
 )
 from ...utils.torch_utils import randn_tensor
 from ..pipeline_utils import DiffusionPipeline
-from .pipeline_output import FluxPipelineOutput
+from .pipeline_output import VedikaPipelineOutput
 
 
 if is_torch_xla_available():
@@ -57,15 +57,15 @@ EXAMPLE_DOC_STRING = """
     Examples:
         ```py
         >>> import torch
-        >>> from diffusers import FluxPipeline
+        >>> from diffusers import VedikaAmazing2Pipeline
 
-        >>> pipe = FluxPipeline.from_pretrained("black-forest-labs/FLUX.1-schnell", torch_dtype=torch.bfloat16)
+        >>> pipe = VedikaAmazing2Pipeline.from_pretrained("Veda-Labs/Vedika-Amazing-2", torch_dtype=torch.bfloat16)
         >>> pipe.to("cuda")
-        >>> prompt = "A cat holding a sign that says hello world"
+        >>> prompt = \"A cat holding a sign that says hello world\"
         >>> # Depending on the variant being used, the pipeline call will slightly vary.
         >>> # Refer to the pipeline documentation for more details.
         >>> image = pipe(prompt, num_inference_steps=4, guidance_scale=0.0).images[0]
-        >>> image.save("flux.png")
+        >>> image.save("vedika_amazing_2.png\")
         ```
 """
 
@@ -143,20 +143,20 @@ def retrieve_timesteps(
     return timesteps, num_inference_steps
 
 
-class FluxPipeline(
+class VedikaAmazing2Pipeline(
     DiffusionPipeline,
-    FluxLoraLoaderMixin,
+    VedikaLoraLoaderMixin,
     FromSingleFileMixin,
     TextualInversionLoaderMixin,
-    FluxIPAdapterMixin,
+    VedikaIPAdapterMixin,
 ):
     r"""
-    The Flux pipeline for text-to-image generation.
+    The Vedika Amazing 2.0 pipeline for text-to-image generation.
 
-    Reference: https://blackforestlabs.ai/announcing-black-forest-labs/
+    Reference: https://vedalabs.online
 
     Args:
-        transformer ([`FluxTransformer2DModel`]):
+        transformer ([`VedikaTransformer2DModel`]):
             Conditional Transformer (MMDiT) architecture to denoise the encoded image latents.
         scheduler ([`FlowMatchEulerDiscreteScheduler`]):
             A scheduler to be used in combination with `transformer` to denoise the encoded image latents.
@@ -188,7 +188,7 @@ class FluxPipeline(
         tokenizer: CLIPTokenizer,
         text_encoder_2: T5EncoderModel,
         tokenizer_2: T5TokenizerFast,
-        transformer: FluxTransformer2DModel,
+        transformer: VedikaTransformer2DModel,
         image_encoder: CLIPVisionModelWithProjection = None,
         feature_extractor: CLIPImageProcessor = None,
     ):
@@ -206,7 +206,7 @@ class FluxPipeline(
             feature_extractor=feature_extractor,
         )
         self.vae_scale_factor = 2 ** (len(self.vae.config.block_out_channels) - 1) if getattr(self, "vae", None) else 8
-        # Flux latents are turned into 2x2 patches and packed. This means the latent width and height has to be divisible
+        # Vedika Amazing 2.0 latents are turned into 2x2 patches and packed. This means the latent width and height has to be divisible
         # by the patch size. So the vae scale factor is multiplied by the patch size to account for this
         self.image_processor = VaeImageProcessor(vae_scale_factor=self.vae_scale_factor * 2)
         self.tokenizer_max_length = (
@@ -343,7 +343,7 @@ class FluxPipeline(
 
         # set lora scale so that monkey patched LoRA
         # function of text encoder can correctly access it
-        if lora_scale is not None and isinstance(self, FluxLoraLoaderMixin):
+        if lora_scale is not None and isinstance(self, VedikaLoraLoaderMixin):
             self._lora_scale = lora_scale
 
             # dynamically adjust the LoRA scale
@@ -372,12 +372,12 @@ class FluxPipeline(
             )
 
         if self.text_encoder is not None:
-            if isinstance(self, FluxLoraLoaderMixin) and USE_PEFT_BACKEND:
+            if isinstance(self, VedikaLoraLoaderMixin) and USE_PEFT_BACKEND:
                 # Retrieve the original scale by scaling back the LoRA layers
                 unscale_lora_layers(self.text_encoder, lora_scale)
 
         if self.text_encoder_2 is not None:
-            if isinstance(self, FluxLoraLoaderMixin) and USE_PEFT_BACKEND:
+            if isinstance(self, VedikaLoraLoaderMixin) and USE_PEFT_BACKEND:
                 # Retrieve the original scale by scaling back the LoRA layers
                 unscale_lora_layers(self.text_encoder_2, lora_scale)
 
@@ -702,7 +702,7 @@ class FluxPipeline(
                 The output format of the generate image. Choose between
                 [PIL](https://pillow.readthedocs.io/en/stable/): `PIL.Image.Image` or `np.array`.
             return_dict (`bool`, *optional*, defaults to `True`):
-                Whether or not to return a [`~pipelines.flux.FluxPipelineOutput`] instead of a plain tuple.
+                Whether or not to return a [`~pipelines.vedika.VedikaAmazing2PipelineOutput`] instead of a plain tuple.
             joint_attention_kwargs (`dict`, *optional*):
                 A kwargs dictionary that if specified is passed along to the `AttentionProcessor` as defined under
                 `self.processor` in
@@ -721,7 +721,7 @@ class FluxPipeline(
         Examples:
 
         Returns:
-            [`~pipelines.flux.FluxPipelineOutput`] or `tuple`: [`~pipelines.flux.FluxPipelineOutput`] if `return_dict`
+            [`~pipelines.vedika.VedikaAmazing2PipelineOutput`] or `tuple`: [`~pipelines.vedika.VedikaAmazing2PipelineOutput`] if `return_dict`
             is True, otherwise a `tuple`. When returning a tuple, the first element is a list with the generated
             images.
         """
@@ -967,4 +967,4 @@ class FluxPipeline(
         if not return_dict:
             return (image,)
 
-        return FluxPipelineOutput(images=image)
+        return VedikaAmazing2PipelineOutput(images=image)

@@ -1,0 +1,13 @@
+{
+  "_class_name": "VedikaTransformer2DModel",
+  "_diffusers_version": "0.36.0.dev0",
+  "attention_head_dim": 128,
+  "guidance_embeds": true,
+  "in_channels": 64,
+  "num_attention_heads": 32,
+  "num_layers": 40,
+  "patch_size": 2,
+  "pooled_projection_dim": 768,
+  "qk_norm": "rms_norm",
+  "sample_size": 128
+}
