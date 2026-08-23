@@ -1,5 +1,5 @@
 {
-  "_class_name": "AutoencoderKLFlux2",
+  "_class_name": "AutoencoderKLVedika",
   "_diffusers_version": "0.36.0.dev0",
   "act_fn": "silu",
   "batch_norm_eps": 0.0001,
