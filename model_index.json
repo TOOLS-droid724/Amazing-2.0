@@ -1,5 +1,5 @@
 {
-  "_class_name": "VedikaPipeline",
+  "_class_name": "Flux2Pipeline",
   "_diffusers_version": "0.36.0.dev0",
   "scheduler": [
     "diffusers",
