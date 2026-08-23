@@ -40,7 +40,7 @@ from ...utils import (
 )
 from ...utils.torch_utils import randn_tensor
 from ..pipeline_utils import DiffusionPipeline
-from .pipeline_output import VedikaPipelineOutput
+from .pipeline_output import FluxPipelineOutput
 
 
 if is_torch_xla_available():
@@ -57,15 +57,15 @@ EXAMPLE_DOC_STRING = """
     Examples:
         ```py
         >>> import torch
-        >>> from diffusers import VedikaPipeline
+        >>> from diffusers import FluxPipeline
 
-        >>> pipe = VedikaPipeline.from_pretrained("VedaLabsAI/vedika-amazing-2.0", torch_dtype=torch.bfloat16)
+        >>> pipe = FluxPipeline.from_pretrained("black-forest-labs/FLUX.1-schnell", torch_dtype=torch.bfloat16)
         >>> pipe.to("cuda")
-        >>> prompt = \"A cat holding a sign that says hello world\"
+        >>> prompt = "A cat holding a sign that says hello world"
         >>> # Depending on the variant being used, the pipeline call will slightly vary.
         >>> # Refer to the pipeline documentation for more details.
         >>> image = pipe(prompt, num_inference_steps=4, guidance_scale=0.0).images[0]
-        >>> image.save(\"vedika.png\")
+        >>> image.save("flux.png")
         ```
 """
 
@@ -143,7 +143,7 @@ def retrieve_timesteps(
     return timesteps, num_inference_steps
 
 
-class VedikaPipeline(
+class FluxPipeline(
     DiffusionPipeline,
     FluxLoraLoaderMixin,
     FromSingleFileMixin,
@@ -151,9 +151,9 @@ class VedikaPipeline(
     FluxIPAdapterMixin,
 ):
     r"""
-    The Vedika Amazing 2.0 pipeline for text-to-image generation.
+    The Flux pipeline for text-to-image generation.
 
-    Reference: https://vedalabs.online/
+    Reference: https://blackforestlabs.ai/announcing-black-forest-labs/
 
     Args:
         transformer ([`FluxTransformer2DModel`]):
@@ -702,7 +702,7 @@ class VedikaPipeline(
                 The output format of the generate image. Choose between
                 [PIL](https://pillow.readthedocs.io/en/stable/): `PIL.Image.Image` or `np.array`.
             return_dict (`bool`, *optional*, defaults to `True`):
-                Whether or not to return a [`~pipelines.vedika.VedikaPipelineOutput`] instead of a plain tuple.
+                Whether or not to return a [`~pipelines.flux.FluxPipelineOutput`] instead of a plain tuple.
             joint_attention_kwargs (`dict`, *optional*):
                 A kwargs dictionary that if specified is passed along to the `AttentionProcessor` as defined under
                 `self.processor` in
@@ -721,7 +721,7 @@ class VedikaPipeline(
         Examples:
 
         Returns:
-            [`~pipelines.vedika.VedikaPipelineOutput`] or `tuple`: [`~pipelines.vedika.VedikaPipelineOutput`] if `return_dict`
+            [`~pipelines.flux.FluxPipelineOutput`] or `tuple`: [`~pipelines.flux.FluxPipelineOutput`] if `return_dict`
             is True, otherwise a `tuple`. When returning a tuple, the first element is a list with the generated
             images.
         """
@@ -967,4 +967,4 @@ class VedikaPipeline(
         if not return_dict:
             return (image,)
 
-        return VedikaPipelineOutput(images=image)
+        return FluxPipelineOutput(images=image)
