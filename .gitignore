@@ -1,0 +1,48 @@
+```
+# Configuration and model files that might be generated
+*.json
+config.json
+scheduler_config.json
+tokenizer_config.json
+processor_config.json
+preprocessor_config.json
+special_tokens_map.json
+tokenizer.json
+chat_template.json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Build and distribution
+dist/
+build/
+*.egg-info/
+
+# Coverage reports
+.coverage
+coverage/
+htmlcov/
+
+# MyPy cache
+.mypy_cache/
+# Pytest cache
+.pytest_cache/
+```

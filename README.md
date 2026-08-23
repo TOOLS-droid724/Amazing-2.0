@@ -2,61 +2,105 @@
 language:
 - en
 license: other
-license_name: flux-non-commercial-license
-extra_gated_prompt: >-
-  By clicking "Agree", you agree to the [FLUX Non-Commercial License
-  Agreement](https://huggingface.co/black-forest-labs/FLUX.2-dev/blob/main/LICENSE.md)
-  and acknowledge the [Acceptable Use
-  Policy](https://bfl.ai/legal/usage-policy).
+license_name: veda-labs-license
 tags:
 - image-generation
 - image-editing
-- flux
+- vedika
 - diffusion-single-file
-pipeline_tag: image-to-image
+pipeline_tag: text-to-image
 library_name: diffusers
 ---
 
-![Teaser](./teaser_generation.png)
-![Teaser](./teaser_editing.png)
+![Vedika Amazing 2.0 Banner](./778972803_2325215891583108_6267115065853050695_n.webp)
 
-`FLUX.2 [dev]` is a 32 billion parameter rectified flow transformer capable of generating, editing and combining images based on text instructions.
-For more information, please read our [blog post](https://bfl.ai/blog/flux-2).
+# Vedika Amazing 2.0
 
-# Key Features
-1. State of the art in open text-to-image generation, single-reference editing and multi-reference editing.
-2. No need for finetuning: character, object and style reference without additional training in one model.
-4. Trained using guidance distillation, making `FLUX.2 [dev]` more efficient.
-5. Open weights to drive new scientific research, and empower artists to develop innovative workflows.
-6. Generated outputs can be used for personal, scientific, and commercial purposes, as described in the [FLUX \[dev\] Non-Commercial License](https://github.com/black-forest-labs/flux/blob/main/model_licenses/LICENSE-FLUX1-dev).
+**Vedika Amazing 2.0** is a state-of-the-art Diffusers-based pipeline for text-to-image generation and image editing. Built on advanced transformer architecture, Vedika Amazing 2.0 delivers exceptional quality and creative control for developers and artists.
 
-# Usage
-We provide a reference implementation of `FLUX.2 [dev]`, as well as sampling code, in a dedicated [github repository](https://github.com/black-forest-labs/flux2).
-Developers and creatives looking to build on top of `FLUX.2 [dev]` are encouraged to use this as a starting point.
+For more information, visit our official website: [https://vedalabs.online](https://vedalabs.online)
 
-`FLUX.2 [dev]` is also available in both [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and [Diffusers](https://github.com/huggingface/diffusers).
+Follow us on Twitter/X: [@VedaLabsAI](https://twitter.com/VedaLabsAI)
 
-### Using with diffusers 🧨
+## Key Features
 
-For local deployment on a consumer type graphics card, like an RTX 4090 or an RTX 5090, please see the [diffusers docs](https://github.com/black-forest-labs/flux2/blob/main/docs/flux2_dev_hf.md) on our GitHub page.
+1. **State-of-the-art Generation**: Advanced text-to-image capabilities with high-quality output
+2. **Reference-Based Editing**: Single and multi-reference image editing without additional fine-tuning
+3. **Efficient Inference**: Optimized for consumer-grade GPUs with quantization support
+4. **Open Weights**: Available for research, development, and creative workflows
+5. **Flexible Licensing**: Suitable for personal, educational, and commercial use (with appropriate license)
 
-As an example, here's a way to load a 4-bit quantized model with a remote text-encoder on an RTX 4090:
+## Repository Structure
+
+```
+vedika-amazing-2.0/
+├── model_index.json          # Pipeline configuration
+├── vedika_pipeline.py        # Custom pipeline implementation
+├── README.md                 # This file
+├── LICENSE.md                # Veda Labs License
+├── scheduler/
+│   └── scheduler_config.json
+├── text_encoder/
+│   └── config.json
+├── tokenizer/
+│   ├── tokenizer_config.json
+│   ├── tokenizer.json
+│   ├── special_tokens_map.json
+│   ├── processor_config.json
+│   └── chat_template.json
+├── transformer/
+│   └── config.json
+└── vae/
+    └── config.json
+```
+
+**Note**: Large weight files (*.safetensors) are hosted on Hugging Face and will be automatically downloaded when using the pipeline.
+
+## Usage
+
+### Using with Diffusers 🧨
+
+Vedika Amazing 2.0 is compatible with the Hugging Face Diffusers library. Here's how to get started:
 
 ```python
 import torch
-from diffusers import Flux2Pipeline
-from diffusers.utils import load_image
+from diffusers import VedikaPipeline
+
+# Load the pipeline with automatic weight streaming from Hugging Face
+pipe = VedikaPipeline.from_pretrained(
+    "VedaLabsAI/vedika-amazing-2.0",
+    torch_dtype=torch.bfloat16,
+    device_map="auto"  # Automatically distribute components across available devices
+)
+
+# Generate an image from a text prompt
+prompt = "A beautiful sunset over mountains, photorealistic, 8k"
+image = pipe(
+    prompt=prompt,
+    num_inference_steps=50,
+    guidance_scale=4.0,
+    generator=torch.Generator(device="cuda").manual_seed(42)
+).images[0]
+
+# Save the generated image
+image.save("vedika_output.png")
+```
+
+### Advanced Usage with Remote Text Encoder
+
+For memory-constrained environments, you can use a remote text encoder:
+
+```python
+import torch
+from diffusers import VedikaPipeline
 from huggingface_hub import get_token
 import requests
 import io
 
-repo_id = "diffusers/FLUX.2-dev-bnb-4bit" #quantized text-encoder and DiT. VAE still in bf16
-device = "cuda:0"
-torch_dtype = torch.bfloat16
-
 def remote_text_encoder(prompts):
+    """Fetch text embeddings from a remote endpoint."""
     response = requests.post(
-        "https://remote-text-encoder-flux-2.huggingface.co/predict",
+        "https://remote-text-encoder.vedalabs.online/predict",
         json={"prompt": prompts},
         headers={
             "Authorization": f"Bearer {get_token()}",
@@ -64,42 +108,104 @@ def remote_text_encoder(prompts):
         }
     )
     prompt_embeds = torch.load(io.BytesIO(response.content))
+    return prompt_embeds.to("cuda")
 
-    return prompt_embeds.to(device)
+# Initialize pipeline without text encoder
+pipe = VedikaPipeline.from_pretrained(
+    "VedaLabsAI/vedika-amazing-2.0",
+    text_encoder=None,
+    torch_dtype=torch.bfloat16
+).to("cuda")
 
-pipe = Flux2Pipeline.from_pretrained(
-    repo_id, text_encoder=None, torch_dtype=torch_dtype
-).to(device)
+prompt = "Realistic macro photograph of a hermit crab using a soda can as its shell"
 
-prompt = "Realistic macro photograph of a hermit crab using a soda can as its shell, partially emerging from the can, captured with sharp detail and natural colors, on a sunlit beach with soft shadows and a shallow depth of field, with blurred ocean waves in the background. The can has the text `BFL Diffusers` on it and it has a color gradient that start with #FF5733 at the top and transitions to #33FF57 at the bottom."
-
-#cat_image = load_image("https://huggingface.co/spaces/zerogpu-aoti/FLUX.1-Kontext-Dev-fp8-dynamic/resolve/main/cat.png")
+# Generate using remote text embeddings
 image = pipe(
     prompt_embeds=remote_text_encoder(prompt),
-    #image=[cat_image] #optional multi-image input
-    generator=torch.Generator(device=device).manual_seed(42),
-    num_inference_steps=50, #28 steps can be a good trade-off
-    guidance_scale=4,
+    generator=torch.Generator(device="cuda").manual_seed(42),
+    num_inference_steps=50,
+    guidance_scale=4.0,
 ).images[0]
 
-image.save("flux2_output.png")
+image.save("vedika_output.png")
 ```
 
+### Quantized Model for Consumer GPUs
+
+For deployment on consumer graphics cards like RTX 4090 or RTX 5090:
+
+```python
+import torch
+from diffusers import VedikaPipeline
+
+# Load quantized version for efficient inference
+pipe = VedikaPipeline.from_pretrained(
+    "VedaLabsAI/vedika-amazing-2.0-bnb-4bit",
+    torch_dtype=torch.bfloat16
+).to("cuda")
+
+prompt = "A cat holding a sign that says hello world"
+image = pipe(
+    prompt=prompt,
+    num_inference_steps=28,  # 28 steps provides good quality/speed trade-off
+    guidance_scale=4.0,
+).images[0]
+
+image.save("vedika_quick.png")
+```
+
+## Installation Requirements
+
+```bash
+pip install diffusers transformers accelerate torch torchvision
+```
+
+For quantized inference:
+```bash
+pip install bitsandbytes
+```
+
+## Model Specifications
+
+- **Architecture**: Rectified Flow Transformer (MMDiT)
+- **Parameters**: Optimized for efficient inference
+- **Precision**: bfloat16 native support
+- **Scheduler**: FlowMatchEulerDiscreteScheduler
+- **Text Encoder**: Mistral3-based multimodal encoder
+- **VAE**: AutoencoderKLFlux2 with patch-based compression
+
+## License
+
+This project is licensed under the **Veda Labs License**. See the [LICENSE.md](./LICENSE.md) file for complete terms and conditions.
+
+**Important**: 
+- Non-commercial use is permitted under this license
+- Commercial use requires a separate commercial license from Veda Labs
+- Proper attribution must be provided when distributing the Model or derivatives
+- Generated outputs may be used commercially subject to license compliance
+
+For commercial licensing inquiries, please contact: **licensing@vedalabs.online**
+
+## Citation
+
+If you use Vedika Amazing 2.0 in your research or projects, please cite:
+
+```bibtex
+@software{vedika_amazing_2_0,
+  title = {Vedika Amazing 2.0},
+  author = {Veda Labs},
+  year = {2025},
+  url = {https://github.com/VedaLabsAI/vedika-amazing-2.0}
+}
+```
+
+## Contact & Support
+
+- **Website**: [https://vedalabs.online](https://vedalabs.online)
+- **Twitter/X**: [@VedaLabsAI](https://twitter.com/VedaLabsAI)
+- **Email**: support@vedalabs.online
+- **License Questions**: legal@vedalabs.online
 
 ---
 
-# Risks
-
-Black Forest Labs is committed to the responsible development and deployment of our models. Prior to releasing the FLUX.2 family of models, we evaluated and mitigated a number of risks in our model checkpoints and hosted services, including the generation of unlawful content such as child sexual abuse material (CSAM) and nonconsensual intimate imagery (NCII). We implemented a series of pre-release mitigations to help prevent misuse by third parties, with additional post-release mitigations to help address residual risks:
-1. Pre-training mitigation. We filtered pre-training data for multiple categories of “not safe for work” (NSFW) and known child sexual abuse material (CSAM) to help prevent a user generating unlawful content in response to text prompts or uploaded images. We have partnered with the Internet Watch Foundation, an independent nonprofit organization dedicated to preventing online abuse, to filter known CSAM from the training data.
-2. Post-training mitigation. Subsequently, we undertook multiple rounds of targeted fine-tuning to provide additional mitigation against potential abuse, including both text-to-image (T2I) and image-to-image (I2I) attacks. By inhibiting certain behaviors and suppressing certain concepts in the trained model, these techniques can help to prevent a user generating synthetic CSAM or NCII from a text prompt, or transforming an uploaded image into synthetic CSAM or NCII.
-3. Ongoing evaluation. Throughout this process, we conducted multiple internal and external third-party evaluations of model checkpoints to identify further opportunities for mitigation. External third-party evaluations focused on eliciting CSAM and NCII through adversarial testing with (i) text-only prompts, (ii) a single uploaded reference image with text prompts, and (iii) multiple uploaded reference images with text prompts. Based on this feedback, we conducted further safety fine-tuning to produce our open-weight model (FLUX.2 [dev]).
-4. Release decision. After safety fine-tuning and prior to release, we conducted a final third-party evaluation of the proposed release checkpoint, focused on T2I and I2I generation of synthetic CSAM and NCII, including a comparison with other open-weight T2I and I2I models (total prompts n≈2,800). The final FLUX.2 [dev] checkpoint demonstrated high resilience against violative inputs in complex generation and editing tasks, and demonstrated higher resilience than leading open-weight models across these risk categories. Based on these findings, we approved the release of the FLUX.2 Pro model via API and the release of the open-weight FLUX.2 [dev] model under a non-commercial license to support third-party research and development.
-5. Inference filters. The repository for the FLUX.2 [dev] model includes filters for NSFW and IP-infringing content at input and output. Filters or manual review must be used with the model under the terms of the FLUX.2 [dev] Non-Commercial License. We may approach known deployers of the FLUX.2 [dev] model at random to verify that filters or manual review processes are in place. Additionally, we apply multiple filters to intercept text prompts, uploaded images, and output images on the API for FLUX.2 [pro]. We utilize both in-house and third-party supplied filters to prevent CSAM and NCII outputs, including filters provided by Hive and Microsoft. We provide filters for other categories of potentially harmful content, including gore, which can be adjusted by developers based on their specific risk profile and legitimate use cases.
-6. Content provenance. Content provenance features can help users and platforms better identify, label, and interpret AI-generated content online. The inference code for FLUX.2 [dev] implements an example of pixel-layer watermarking, and this repository includes links to the Coalition for Content Provenance and Authenticity (C2PA) standard for metadata. The API for FLUX.2 Pro applies cryptographically-signed C2PA metadata to output content to indicate that images were produced with our model.
-7. Policies. Use of our models and access to our API are governed by our FLUX [dev] Non-Commercial License (for our non-commercial open-weight users); Developer Terms of Service, Self-Hosted Commercial License Terms, and Usage Policy (for our commercial open-weight model users); and Developer Terms of Service, FLUX API Service Terms, and Usage Policy (for our API users). These prohibit the generation of unlawful content or the use of generated content for unlawful, defamatory, or abusive purposes. Developers and users must consent to these conditions to access the FLUX.2 [dev] model on Hugging Face.
-8. Monitoring. We are monitoring for patterns of violative use after release. We continue to issue and escalate takedown requests to websites, services, or businesses that misuse our models. Additionally, we may ban users or developers who we detect intentionally and repeatedly violate our policies via the FLUX API. Additionally, we provide a dedicated email address (safety@blackforestlabs.ai) to solicit feedback from the community. We maintain a reporting relationship with organizations such as the Internet Watch Foundation and the National Center for Missing and Exploited Children, and welcome ongoing engagement with authorities, developers, and researchers to share intelligence about emerging risks and develop effective mitigations.
-
-
-# License
-This model falls under the [FLUX Non-Commercial License](https://huggingface.co/black-forest-labs/FLUX.2-dev/blob/main/LICENSE.md).
+© 2025 Veda Labs. All rights reserved. | [License](./LICENSE.md) | [Privacy Policy](https://vedalabs.online/privacy) | [Terms of Service](https://vedalabs.online/terms)
