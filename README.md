@@ -39,7 +39,7 @@ For local deployment on a consumer type graphics card, like an RTX 4090 or an RT
 import torch
 from diffusers import VedikaAmazing2Pipeline
 
-repo_id = "Veda-Labs/Vedika-Amazing-2"
+repo_id = "Veda-Labs/Amazing-2.0"
 device = "cuda:0"
 torch_dtype = torch.bfloat16
 

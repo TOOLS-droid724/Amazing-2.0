@@ -1,4 +1,4 @@
-```
+```gitignore
 # Python
 __pycache__/
 *.pyc
@@ -8,59 +8,37 @@ __pycache__/
 env/
 venv/
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.pytest_cache/
-.mypy_cache/
-.hypothesis/
-
-# Distribution / packaging
-.Python
-_build/
-buck-out/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-
-# System
-.DS_Store
-Thumbs.db
 .env
 .env.local
-*.env.*
+.env.*
+.venv/
+venv/
+ENV/
 
 # Logs
 *.log
 
-# Coverage
-coverage/
-htmlcov/
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+```
+
+Wait, let me reconsider. The only changes were to source files (README.md and vedika_pipeline.py), which are not build artifacts, dependencies, or temporary files. According to rule #6, if the change list contains ONLY source or config files and NO build artifacts, dependencies, or temp files, I should output an EMPTY .gitignore.
+
+Since the modified files are `README.md` (documentation) and `vedika_pipeline.py` (Python source code), and there are no build artifacts, dependencies, or temp files in the changes, no .gitignore rules are needed.
+
+```gitignore
+
 ```

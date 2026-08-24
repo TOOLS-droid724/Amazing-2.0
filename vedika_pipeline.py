@@ -59,7 +59,7 @@ EXAMPLE_DOC_STRING = """
         >>> import torch
         >>> from diffusers import VedikaAmazing2Pipeline
 
-        >>> pipe = VedikaAmazing2Pipeline.from_pretrained("Veda-Labs/Vedika-Amazing-2", torch_dtype=torch.bfloat16)
+        >>> pipe = VedikaAmazing2Pipeline.from_pretrained("Veda-Labs/Amazing-2.0", torch_dtype=torch.bfloat16)
         >>> pipe.to("cuda")
         >>> prompt = \"A cat holding a sign that says hello world\"
         >>> # Depending on the variant being used, the pipeline call will slightly vary.
